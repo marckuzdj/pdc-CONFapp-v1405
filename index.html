@@ -138,7 +138,46 @@
             transition: background 0.2s;
         }
         .modal-retido-box button:hover { background-color: #5a6268; }
-  
+
+                /* Estilização moderna para as Ocorrências de Encerramento */
+        .modal-pergunta-overlay, .screen-ocorrencia-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 100000;
+        }
+        .box-card-ocorrencia {
+            background-color: #ffffff;
+            padding: 25px; border-radius: 12px;
+            max-width: 500px; width: 92%;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.4);
+            font-family: sans-serif;
+        }
+        .box-card-ocorrencia h3 {
+            margin-top: 0; color: #333; font-size: 20px;
+            border-bottom: 2px solid #007bff; padding-bottom: 8px;
+        }
+        .form-group-oc {
+            margin-bottom: 15px; text-align: left;
+        }
+        .form-group-oc label {
+            display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; color: #444;
+        }
+        .form-group-oc select, .form-group-oc input, .form-group-oc textarea {
+            width: 100%; padding: 10px; border: 1px solid #ccc;
+            border-radius: 6px; font-size: 14px; box-sizing: border-box;
+        }
+        .btn-group-oc {
+            display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;
+        }
+        .btn-oc {
+            padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 15px; font-weight: bold;
+        }
+        .btn-oc-primary { background-color: #007bff; color: white; }
+        .btn-oc-secondary { background-color: #6c757d; color: white; }
+        .btn-oc-danger { background-color: #dc3545; color: white; }
+        
     </style>
 </head>
 <body>
@@ -146,15 +185,67 @@
 <!-- Estrutura nativa do Modal (Inicia oculto) -->
 <div id="modalRetido" class="modal-retido-overlay hidden" style="display: none;">
     <div class="modal-retido-box">
-        <h2>⚠️ Romaneio Retido</h2>
+        <h2>⚠️ Este Romaneio Possui Restrições/Ressalvas:</h2>
         <div id="modalRetidoDesc" class="modal-retido-desc"></div>
         <button onclick="fecharModalRetido()">Voltar</button>
     </div>
 </div>
 
+<!-- 1. Modal de Pergunta Inicial -->
+<div id="modalPerguntaOcorrencia" class="modal-pergunta-overlay hidden" style="display: none;">
+    <div class="box-card-ocorrencia" style="text-align: center;">
+        <h3 style="border:none; color:#007bff;">📋 Registro de Ocorrência</h3>
+        <p style="font-size: 16px; color:#444; margin: 20px 0;">Deseja adicionar ocorrência para o Romaneio (Temas: Pedidos/Volumes ou Notas fiscais)?</p>
+        <div class="btn-group-oc" style="justify-content: center;">
+            <button class="btn-oc btn-oc-primary" onclick="abrirTelaOcorrenciaCompleta()">Sim</button>
+            <button class="btn-oc btn-oc-secondary" onclick="pularOcorrenciaEFinalizar()">Não</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Card/Tela Formulado de Ocorrência -->
+<div id="screenOcorrenciaLote" class="screen-ocorrencia-overlay hidden" style="display: none;">
+    <div class="box-card-ocorrencia">
+        <h3 id="tituloOcorrenciaRomaneio">Ocorrencias - </h3>
+        
+        <div class="form-group-oc">
+            <label>Motivo da retenção:</label>
+            <select id="oc_motivo">
+                <option value="">Selecione o motivo...</option>
+                <optgroup label="📦 Carga e Pedidos">
+                    <option value="Divergência de Quantidade">Divergência de Quantidade (Faltando/Sobrando)</option>
+                    <option value="Mercadoria Avariada">Mercadoria Avariada/Danificada</option>
+                </optgroup>
+                <optgroup label="📄 Documentação e Fiscal">
+                    <option value="NF não Emitida">NF não Emitida / Erro no Faturamento</option>
+                    <option value="Divergência de Valores">Divergência de Valores/Impostos</option>
+                </optgroup>
+                <optgroup label="⚠️ Outros">
+                    <option value="Nova Intercorrencia">Nova Intercorrencia</option>
+                </optgroup>
+            </select>
+        </div>
+
+        <div class="form-group-oc">
+            <label>Descrição detalhada:</label>
+            <textarea id="oc_descricao" rows="3" placeholder="Insira o texto descritivo do problema ocorrido..."></textarea>
+        </div>
+
+        <div class="form-group-oc">
+            <label>TOKEN DE DEVOLUÇÃO</label>
+            <input type="text" id="oc_token_devolucao" placeholder="Digite o token de autorização">
+        </div>
+
+        <div class="btn-group-oc">
+            <button class="btn-oc btn-oc-secondary" onclick="pularOcorrenciaEFinalizar()">Ignorar e Fechar</button>
+            <button id="btnEnviarOcorrenciaFinal" class="btn-oc btn-oc-danger" onclick="enviarOcorrenciaFluxo()">Enviar</button>
+        </div>
+    </div>
+</div>
+
 <!-- 1. TELA DE LOGIN -->
 <div id="screen-login" class="card"> <!-- Adicionado a classe card aqui -->
-    <h3>Passagem de Carga | Conferência v4</h3>
+    <h3>Passagem de Carga | Conferência v5</h3>
     <label>E-mail</label>
     <input type="email" id="login-user" placeholder="seu@email.com">
     
@@ -1334,11 +1425,21 @@ async function enviarDadosFinais() {
                 dadosCompletos.forEach(info => select.add(new Option(info.Romaneio, info.Romaneio)));
             }
 
-            // --- PROMPTS DE COMENTÁRIO REMOVIDOS ---
-            // Dispara apenas a conclusão de sucesso e limpa a tela de trabalho
+            // INTERCEPTADOR DE OCORRÊNCIAS DE ENCERRAMENTO
             setTimeout(() => {
-                alert("Lote finalizado com sucesso!");
-                resetarInterface();
+                // Guarda o romaneio processado para uso nas telas de ocorrência
+                romaneioSendoFinalizado = romaneioAtual; 
+
+                // Exibe o primeiro Modal de Pergunta na tela do operador
+                const modalPerg = document.getElementById("modalPerguntaOcorrencia");
+                if (modalPerg) {
+                    modalPerg.classList.remove("hidden");
+                    modalPerg.style.display = "flex";
+                } else {
+                    // Fallback estrutural se os elementos visuais não forem achados no DOM
+                    alert("Lote finalizado com sucesso!");
+                    resetarInterface();
+                }
             }, 600);
 
         } else {
@@ -1360,6 +1461,7 @@ async function enviarDadosFinais() {
         }
     }
 }
+
 
 
 
@@ -1668,7 +1770,81 @@ function fecharModalRetido() {
     // O resetarInterface() foi removido daqui para deixar o operador seguir viagem
 }
 
- 
+ // Variável temporária de controle para o encerramento em duas etapas
+let romaneioSendoFinalizado = "";
+
+function abrirTelaOcorrenciaCompleta() {
+    document.getElementById("modalPerguntaOcorrencia").style.display = "none";
+    document.getElementById("modalPerguntaOcorrencia").classList.add("hidden");
+    
+    const titulo = document.getElementById("tituloOcorrenciaRomaneio");
+    if(titulo) titulo.innerText = "Ocorrencias - " + romaneioSendoFinalizado;
+    
+    // Limpa campos anteriores por segurança
+    document.getElementById("oc_motivo").value = "";
+    document.getElementById("oc_descricao").value = "";
+    document.getElementById("oc_token_devolucao").value = "";
+    
+    const telaOc = document.getElementById("screenOcorrenciaLote");
+    telaOc.classList.remove("hidden");
+    telaOc.style.display = "flex";
+}
+
+function pularOcorrenciaEFinalizar() {
+    // Esconde todos os elementos de ocorrência abertos
+    document.getElementById("modalPerguntaOcorrencia").style.display = "none";
+    document.getElementById("modalPerguntaOcorrencia").classList.add("hidden");
+    document.getElementById("screenOcorrenciaLote").style.display = "none";
+    document.getElementById("screenOcorrenciaLote").classList.add("hidden");
+    
+    // Entrega o fluxo de encerramento padrão original
+    alert("Lote finalizado com sucesso!");
+    resetarInterface();
+}
+
+async function enviarOcorrenciaFluxo() {
+    const motivo = document.getElementById("oc_motivo").value;
+    const descricao = document.getElementById("oc_descricao").value;
+    const tokenDev = document.getElementById("oc_token_devolucao").value;
+    const btn = document.getElementById("btnEnviarOcorrenciaFinal");
+
+    if (!motivo) return alert("⚠️ Selecione o motivo da retenção!");
+    if (!descricao.trim()) return alert("⚠️ Digite uma descrição detalhada!");
+    if (!tokenDev.trim()) return alert("⚠️ Informe o TOKEN DE DEVOLUÇÃO!");
+
+    btn.disabled = true;
+    btn.innerText = "Gravando...";
+
+    try {
+        // Envia os dados complementares para salvar a ocorrência na planilha via endpoint existente
+        const payloadOcorrencia = {
+            action: "atualizarObsExtra", // Reaproveita rota de comentários mapeada no backend
+            romaneio: romaneioSendoFinalizado,
+            comentario: `[OCORRÊNCIA: ${motivo}] ${descricao} | TokenDev: ${tokenDev}`
+        };
+
+        await fetch(urlSheets, {
+            method: 'POST',
+            body: JSON.stringify(payloadOcorrencia)
+        });
+
+        // Fecha tela e encerra fluxo com sucesso
+        document.getElementById("screenOcorrenciaLote").style.display = "none";
+        document.getElementById("screenOcorrenciaLote").classList.add("hidden");
+        
+        alert("Ocorrência registrada e Lote finalizado com sucesso!");
+        resetarInterface();
+
+    } catch (err) {
+        console.error("Erro ao submeter ocorrência:", err);
+        alert("⚠️ O lote foi salvo, mas houve falha ao injetar a ocorrência no servidor.");
+        pularOcorrenciaEFinalizar();
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "Enviar";
+    }
+}
+
 
 </script>
 
