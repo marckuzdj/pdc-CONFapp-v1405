@@ -110,7 +110,7 @@
 
 <!-- 1. TELA DE LOGIN -->
 <div id="screen-login" class="card"> <!-- Adicionado a classe card aqui -->
-    <h3>Passagem de Carga | Conferência v3</h3>
+    <h3>Passagem de Carga | Conferência v4</h3>
     <label>E-mail</label>
     <input type="email" id="login-user" placeholder="seu@email.com">
     
@@ -385,7 +385,7 @@ document.addEventListener("change", function(evento) {
         }
 
         // Abre o prompt de digitação exibido na imagem
-        const descricao = window.prompt(`Descreva com detalhes, a divergência de volumes para o romaneio ${romaneioVal}. Mencione nº do Pedido, Total de volumes recebidos etc...`);
+        const descricao = window.prompt(`Descreva com detalhes, a divergência de volumes para o romaneio ${romaneioVal}. Relacione nº dos Pedidos/Qtd de volumes faltantes.`);
 
         if (descricao === null || descricao.trim() === "") {
             alert("⚠️ É obrigatório relatar os detalhes da divergência ao selecionar NÃO!");
@@ -1527,7 +1527,7 @@ function resetarTravaEnvio(btn, area) {
 
 
 
-let intercorrenciaFinal = "CONCLUÍDO";
+// let intercorrenciaFinal = "CONCLUÍDO";
 // --- FUNÇÃO DE FINALIZAÇÃO CORRIGIDA E BLINDADA CONTRA CONFLITOS DE ESCOPO ---
 async function finalizarLote() {
     if (enviandoDados) return;
