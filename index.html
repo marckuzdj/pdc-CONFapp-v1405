@@ -110,7 +110,7 @@
 
 <!-- 1. TELA DE LOGIN -->
 <div id="screen-login" class="card"> <!-- Adicionado a classe card aqui -->
-    <h3>Passagem de Carga | Conferência v4</h3>
+    <h3>Passagem de Carga | Conferência v5</h3>
     <label>E-mail</label>
     <input type="email" id="login-user" placeholder="seu@email.com">
     
@@ -211,28 +211,14 @@
         <!-- Linha 2: Totais (Pedidos e Volumes com Estilo Padrão Nu) -->
         <!-- Linha 2: Totais (Pedidos e Volumes com Estilo Roxo Nu) -->
         <!-- Linha 2: Totais (Pedidos e Volumes com Escutador Nativo) -->
-        <div class="grid-info" style="display: grid; grid-template-columns: 1fr 1.3fr; gap: 12px; margin-bottom: 15px;">
+        <div class="grid-info" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
             <div>
                 <label style="display: block; font-size: 13px; font-weight: 600; color: #6f42c1; margin-bottom: 5px; text-transform: uppercase;">Total Pedidos</label>
                 <input type="text" id="total_pedidos" readonly style="width: 100%; height: 38px; background: #f0f2f5; border: 1px solid #ced4da; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; color: #495057;">
             </div>
             <div>
                 <label style="display: block; font-size: 13px; font-weight: 600; color: #6f42c1; margin-bottom: 5px; text-transform: uppercase;">Total Volumes</label>
-                <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
-                    <input type="text" id="total_volumes" readonly style="width: 40%; height: 38px; background: #f0f2f5; border: 1px solid #ced4da; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; color: #495057;">
-                    
-                    <div style="width: 60%; height: 38px; background: #ffffff; border: 1px solid #ced4da; border-radius: 4px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: system-ui, -apple-system, sans-serif;">
-                        <span style="color: #6f42c1; font-weight: bold; font-size: 8px; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.3px; line-height: 1;">Confirme os volumes?</span>
-                        <div style="display: flex; justify-content: space-around; width: 100%; padding: 0 4px;">
-                            <label style="display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: bold; color: #495057; cursor: pointer; margin: 0; padding: 0;">
-                                <input type="radio" name="confirmaVolumes" id="vol-sim" value="sim" style="margin: 0; width: 13px; height: 13px; cursor: pointer;"> SIM
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: bold; color: #495057; cursor: pointer; margin: 0; padding: 0;">
-                                <input type="radio" name="confirmaVolumes" id="vol-nao" value="nao" style="margin: 0; width: 13px; height: 13px; cursor: pointer;"> NÃO
-                            </label>
-                        </div>
-                    </div>
-                </div>
+                <input type="text" id="total_volumes" readonly style="width: 100%; height: 38px; background: #f0f2f5; border: 1px solid #ced4da; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; color: #495057;">
             </div>
         </div>
 
@@ -1527,13 +1513,12 @@ function resetarTravaEnvio(btn, area) {
 
 
 
-// let intercorrenciaFinal = "CONCLUÍDO";
-// --- FUNÇÃO DE FINALIZAÇÃO CORRIGIDA E BLINDADA CONTRA CONFLITOS DE ESCOPO ---
+let intercorrenciaFinal = "CONCLUÍDO";
+
+// --- FUNÇÃO 1: ENVIO DOS DADOS FINAIS (ATUALIZADA APENAS NO RETORNO CONDICIONAL) ---
+// --- FUNÇÃO 2: VALIDAÇÃO DO LOTE (MANTIDA ORIGINAL) ---
 async function finalizarLote() {
     if (enviandoDados) return;
-
-    // 1. Instanciação LOCAL obrigatória para resetar o estado a cada clique do botão
-    let intercorrenciaFinal = "CONCLUÍDO"; 
 
     const romaneioVal = document.getElementById("romaneio").value;
     const areaAssinatura = document.getElementById("areaAssinatura");
@@ -1553,18 +1538,16 @@ async function finalizarLote() {
         areaAssinatura.style.pointerEvents = "none";
 
         // REGRA DE SOBREPOSIÇÃO SOLICITADA:
-        // Verifica na janela global se há divergência prévia para injetar no envio
-        if (typeof window.descricaoDivergenciaVolumes !== "undefined" && window.descricaoDivergenciaVolumes.trim() !== "") {
+        // Se a variável do prompt não estiver vazia, força a intercorrenciaFinal a receber o texto
+        if (typeof window.descricaoDivergenciaVolumes !== "undefined" && window.descricaoDivergenciaVolumes !== "") {
             intercorrenciaFinal = window.descricaoDivergenciaVolumes;
             pulouComentarioFinal = false;
         }
 
-        // ATENÇÃO: Certifique-se de que a função 'enviarDadosFinais' abaixo utilize a 
-        // variável 'intercorrenciaFinal' correta. Se ela for uma função externa, 
-        // passe o valor como argumento: enviarDadosFinais(intercorrenciaFinal);
         await enviarDadosFinais(); 
         return;
     }
+
 
     // --- FASE 1: VALIDAÇÃO E AUDITORIA ---
     btn.disabled = true;
@@ -1574,23 +1557,13 @@ async function finalizarLote() {
         const response = await fetch(`${urlSheets}?action=verificarPendencias&romaneio=${encodeURIComponent(romaneioVal)}`);
         const check = await response.json();
 
-        // 1. Verifica Pendências (Standby)
+        // 1. Verifica Pendências (Standby) - Caso falte bipes, o Cancelar fica oculto
         if (check.faltantes && check.faltantes.length > 0) {
             const qtdFaltantes = check.faltantes.length;
-            
-            // SE já houver divergência mapeada, pula o prompt visual da tela de intercorrência
-            if (typeof window.descricaoDivergenciaVolumes !== "undefined" && window.descricaoDivergenciaVolumes.trim() !== "") {
-                intercorrenciaFinal = window.descricaoDivergenciaVolumes;
-                pulouComentarioFinal = false;
-                // Executa direto a fase de assinatura pulando a tela de digitação
-                await prepararFaseAssinatura(btn, areaAssinatura);
-                return;
-            }
-
             if (confirm(`⚠️ Atenção: Faltam conferir ${qtdFaltantes} itens neste lote.\n\nPara abortar a conferencia do romaneio, é obrigatório registrar intercorrencia. Continuar?`)) {
                 pulouComentarioFinal = true;
                 const btnCancelarIntercor = document.getElementById("btn-cancelar-intercorrencia");
-                if (btnCancelarIntercor) btnCancelarIntercor.style.display = "none"; 
+                if (btnCancelarIntercor) btnCancelarIntercor.style.display = "none"; // Oculta botão (Obrigatório)
                 showScreen('screen-intercorrencia'); 
             }
             btn.disabled = false;
@@ -1598,29 +1571,12 @@ async function finalizarLote() {
             return;
         }
 
-        // 2. Nova Auditoria de Volumes (Validação Rígida dos Botões de Opção)
-        const confirmaRadio = document.querySelector('input[name="confirmaVolumes"]:checked');
-
-        if (!confirmaRadio) {
-            alert("⚠️ Não é permitido seguir sem confirmar os volumes (SIM/NÃO)!!!");
-            btn.disabled = false;
-            btn.innerText = "Finalizar Lote";
-            return;
+        // 2. Reseta a variável de controle preventivamente (Antiga auditoria removida)
+        if (typeof window.descricaoDivergenciaVolumes !== "undefined") {
+            window.descricaoDivergenciaVolumes = ""; 
         }
+        pulouComentarioFinal = false; 
 
-        if (confirmaRadio.value === "sim") {
-            intercorrenciaFinal = "CONCLUÍDO"; // Garante o reset explícito aqui
-            if (typeof window.descricaoDivergenciaVolumes !== "undefined") {
-                window.descricaoDivergenciaVolumes = ""; 
-            }
-            pulouComentarioFinal = false; 
-        } else {
-            // SE MARCOU NÃO: Valida se a string global está populada
-            if (typeof window.descricaoDivergenciaVolumes !== "undefined" && window.descricaoDivergenciaVolumes.trim() !== "") {
-                intercorrenciaFinal = window.descricaoDivergenciaVolumes;
-            }
-            pulouComentarioFinal = false; 
-        }
 
         // 3. Performance: Desliga Hardware
         const usbField = document.getElementById("container-leitor-usb");
@@ -1653,6 +1609,7 @@ async function finalizarLote() {
         alert("❌ Erro na validação.");
     }
 }
+
 
 
 // --- FUNÇÃO AUXILIAR: MAPEIA O CLIQUE EM CANCELAR NA TELA DE INTERCORRÊNCIA ---
