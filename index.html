@@ -245,7 +245,7 @@
 
 <!-- 1. TELA DE LOGIN -->
 <div id="screen-login" class="card"> <!-- Adicionado a classe card aqui -->
-    <h3>Passagem de Carga | Conferência v5</h3>
+    <h3>Passagem de Carga | Conferência v6</h3>
     <label>E-mail</label>
     <input type="email" id="login-user" placeholder="seu@email.com">
     
@@ -1816,34 +1816,42 @@ async function enviarOcorrenciaFluxo() {
     btn.innerText = "Gravando...";
 
     try {
-        // Envia os dados complementares para salvar a ocorrência na planilha via endpoint existente
+        // Envia as propriedades limpas e isoladas para o backend processar
         const payloadOcorrencia = {
-            action: "atualizarObsExtra", // Reaproveita rota de comentários mapeada no backend
+            action: "atualizarObsExtra",
             romaneio: romaneioSendoFinalizado,
-            comentario: `[OCORRÊNCIA: ${motivo}] ${descricao} | TokenDev: ${tokenDev}`
+            oc_motivo: motivo,
+            oc_descricao: descricao.trim(),
+            oc_token: tokenDev.trim()
         };
 
-        await fetch(urlSheets, {
+        const response = await fetch(urlSheets, {
             method: 'POST',
             body: JSON.stringify(payloadOcorrencia)
         });
-
-        // Fecha tela e encerra fluxo com sucesso
-        document.getElementById("screenOcorrenciaLote").style.display = "none";
-        document.getElementById("screenOcorrenciaLote").classList.add("hidden");
         
-        alert("Ocorrência registrada e Lote finalizado com sucesso!");
-        resetarInterface();
+        const result = await response.json();
+
+        if (result.success) {
+            document.getElementById("screenOcorrenciaLote").style.display = "none";
+            document.getElementById("screenOcorrenciaLote").classList.add("hidden");
+            
+            alert("Ocorrência registrada e Lote finalizado com sucesso!");
+            resetarInterface();
+        } else {
+            throw new Error(result.error || "Erro ao salvar no servidor");
+        }
 
     } catch (err) {
         console.error("Erro ao submeter ocorrência:", err);
-        alert("⚠️ O lote foi salvo, mas houve falha ao injetar a ocorrência no servidor.");
+        alert("⚠️ O lote foi salvo, mas houve falha ao injetar a ocorrência no servidor: " + err.message);
         pularOcorrenciaEFinalizar();
     } finally {
         btn.disabled = false;
         btn.innerText = "Enviar";
     }
 }
+
 
 
 </script>
