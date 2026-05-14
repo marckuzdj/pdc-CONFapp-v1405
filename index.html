@@ -110,7 +110,7 @@
 
 <!-- 1. TELA DE LOGIN -->
 <div id="screen-login" class="card"> <!-- Adicionado a classe card aqui -->
-    <h3>Passagem de Carga | Conferência v5</h3>
+    <h3>Passagem de Carga | Conferência v1</h3>
     <label>E-mail</label>
     <input type="email" id="login-user" placeholder="seu@email.com">
     
@@ -208,23 +208,11 @@
             <div><label>Operador</label><input type="text" id="campo_operador" readonly style="background: #f0f2f5;"></div>
         </div>
 
-        <!-- Linha 2: Totais (Pedidos e Volumes com Estilo Padrão Nu) -->
-        <!-- Linha 2: Totais (Pedidos e Volumes com Estilo Roxo Nu) -->
-        <!-- Linha 2: Totais (Pedidos e Volumes com Escutador Nativo) -->
+        <!-- NOVO: Linha 2: Totais (Pedidos e Volumes) -->
         <div class="grid-info" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
-            <div>
-                <label style="display: block; font-size: 13px; font-weight: 600; color: #6f42c1; margin-bottom: 5px; text-transform: uppercase;">Total Pedidos</label>
-                <input type="text" id="total_pedidos" readonly style="width: 100%; height: 38px; background: #f0f2f5; border: 1px solid #ced4da; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; color: #495057;">
-            </div>
-            <div>
-                <label style="display: block; font-size: 13px; font-weight: 600; color: #6f42c1; margin-bottom: 5px; text-transform: uppercase;">Total Volumes</label>
-                <input type="text" id="total_volumes" readonly style="width: 100%; height: 38px; background: #f0f2f5; border: 1px solid #ced4da; border-radius: 4px; text-align: center; font-size: 14px; font-weight: bold; color: #495057;">
-            </div>
+            <div><label>Total Pedidos</label><input type="text" id="total_pedidos" readonly style="background: #f0f2f5;"></div>
+            <div><label>Total Volumes</label><input type="text" id="total_volumes" readonly style="background: #f0f2f5;"></div>
         </div>
-
-
-
-
 
         <!-- Campo para Leitor USB (visível apenas no Desktop) -->
         <div id="container-leitor-usb" style="display: none; text-align: center; margin-bottom: 20px;">
@@ -281,16 +269,14 @@
     <div id="screen-intercorrencia" class="card hidden">
         <h3 style="color: var(--nu-purple); text-align: center;">⏸️ Registro de Intercorrência</h3>
         <p style="font-size: 14px; color: var(--nu-text-light); text-align: center;">
-            Selecione o motivo colocar o romaneio em espera.
+            O romaneio possui pendências. Selecione o motivo colocar em espera.
         </p>
         
         <label>Motivo da Retenção</label>
-        <!-- ADICIONADO onchange para monitorar a seleção em tempo real -->
-        <select id="select-motivo" onchange="verificarMotivoAvaria()">
+        <select id="select-motivo">
             <option value="">Selecione o motivo...</option>
             <optgroup label="📦 Carga e Pedidos">
-                 <!--   <option value="Divergência de Volumes">Divergência de Volumes (Faltando/Sobrando)</option> -->
-                <option value="Divergência de Pedidos">Divergência de Pedidos (Faltando/Sobrando)</option>
+                <option value="Divergência de Quantidade">Divergência de Quantidade (Faltando/Sobrando)</option>
                 <option value="Mercadoria Avariada">Mercadoria Avariada/Danificada</option>
             </optgroup>
             <optgroup label="📄 Documentação e Fiscal">
@@ -298,42 +284,16 @@
                 <option value="Divergência de Valores">Divergência de Valores/Impostos</option>
             </optgroup>
             <optgroup label="⚠️ Outros">
-                <option value="Ressalva">Ressalva</option>
+                <option value="Nova Intercorrencia">Nova Intercorrencia</option>
             </optgroup>
         </select>
     
         <label>Observação Detalhada</label>
         <input type="text" id="obs-intercorrencia" placeholder="Explique os detalhes aqui...">
-
-        <!-- 📸 NOVO CONTAINER PARA FOTO DE AVARIA (OCULTO POR PADRÃO) -->
-        <!-- 📸 CONTAINER HÍBRIDO PARA FOTO DE AVARIA (OCULTO POR PADRÃO) -->
-        <div id="container-foto-avaria" style="display: none; margin: 15px 0; text-align: center;">
-            <label style="color: red; font-weight: bold; display: block; margin-bottom: 5px;">📸 Comprovação de Avaria Obrigatória</label>
-            
-            <!-- 📱 ELEMENTOS EXCLUSIVOS MOBILE (CÂMERA ATIVA) -->
-            <div id="wrapper-cam-mobile" style="display: none;">
-                <video id="video-avaria" autoplay playsinline style="width: 100%; max-width: 300px; border-radius: 8px; background: #000; display: none;"></video>
-                <button type="button" id="btn-iniciar-cam-avaria" class="btn" style="background: var(--nu-purple); color: #fff; margin-top: 5px;" onclick="ligarCameraAvaria()">🎥 Ativar Câmera</button>
-                <button type="button" id="btn-capturar-avaria" class="btn" style="background: #ff9800; color: #fff; margin-top: 5px; display: none;" onclick="capturarFotoAvaria()">📸 Tirar Foto</button>
-            </div>
-
-            <!-- 💻 ELEMENTO EXCLUSIVO DESKTOP (UPLOAD DE ARQUIVO) -->
-            <div id="wrapper-upload-desktop" style="display: none; padding: 10px; border: 2px dashed #ccc; border-radius: 8px; background: #fafafa;">
-                <input type="file" id="file-avaria-desktop" accept="image/*" onchange="processarUploadFotoDesktop(this)" style="display: none;">
-                <button type="button" class="btn" style="background: var(--nu-purple); color: #fff;" onclick="document.getElementById('file-avaria-desktop').click()">📁 Selecionar Imagem da Avaria</button>
-                <p id="txt-file-name" style="font-size: 12px; color: var(--nu-text-light); margin-top: 5px;">Nenhum arquivo selecionado</p>
-            </div>
-
-            <!-- PREVIEW GLOBAL DA IMAGEM CAPTURADA/CARREGADA -->
-            <img id="preview-avaria" style="width: 100%; max-width: 300px; border-radius: 8px; display: none; margin: 10px auto 0;" />
-        </div>
-
     
-        <button id="btn-salvar-intercorrencia" class="btn btn-success" onclick="registrarIntercorrencia()">Registrar e Prosseguir</button>
-        <button type="button" id="btn-cancelar-intercorrencia" class="link-sec" onclick="fecharIntercorrenciaOpcional()" style="border:none; background:none; width:100%; cursor:pointer;">Cancelar</button>
+        <button class="btn btn-success" onclick="registrarIntercorrencia()">Registrar e Prosseguir</button>
+        <button class="link-sec" onclick="showScreen('screen-main')" style="border:none; background:none; width:100%; cursor:pointer;">Cancelar</button>
     </div>
-
-
 
 <script>
       // --- LÓGICA DE NAVEGAÇÃO E CADASTRO ---
@@ -346,65 +306,9 @@ let enviandoDados = false;
 let processandoCadastro = false;
 let validandoAgora = false;
 let pulouComentarioFinal = false; // Nova flag de controle
-let descricaoDivergenciaVolumes = ""; // --- NOVA VARIÁVEL GLOBAL PARA DIVERGÊNCIA DE VOLUMES ---
-    
 window.aparelhoUtilizadoNoLote = sessionStorage.getItem("dispositivoSessao") || (window.innerWidth > 768 ? "via USB" : "via Mobile");
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-// Garante que a variável global exista e comece vazia
-if (typeof descricaoDivergenciaVolumes === 'undefined') {
-    window.descricaoDivergenciaVolumes = "";
-}
-
-// Escutador nativo acoplado direto ao evento de clique do documento
-// Escutador nativo ajustado com o formato cronológico exato dd-MM-yyyy hhmmss
-document.addEventListener("change", function(evento) {
-    
-    if (evento.target && evento.target.id === "vol-nao") {
-        const romaneioVal = document.getElementById("romaneio").value;
-        
-        if (!romaneioVal) {
-            alert("⚠️ Por favor, selecione um romaneio primeiro!");
-            evento.target.checked = false;
-            return;
-        }
-
-        // Abre o prompt de digitação exibido na imagem
-        const descricao = window.prompt(`Descreva com detalhes, a divergência de volumes para o romaneio ${romaneioVal}. Relacione nº dos Pedidos/Qtd de volumes faltantes.`);
-
-        if (descricao === null || descricao.trim() === "") {
-            alert("⚠️ É obrigatório relatar os detalhes da divergência ao selecionar NÃO!");
-            evento.target.checked = false;
-            window.descricaoDivergenciaVolumes = "";
-            return;
-        }
-
-        // --- GERADOR DE DATA E HORA NO FORMATO: dd-MM-yyyy hhmmss ---
-        const agora = new Date();
-        const dia = String(agora.getDate()).padStart(2, '0');
-        const mes = String(agora.getMonth() + 1).padStart(2, '0'); // Meses começam em 0
-        const ano = agora.getFullYear();
-        const hora = String(agora.getHours()).padStart(2, '0');
-        const min = String(agora.getMinutes()).padStart(2, '0');
-        const seg = String(agora.getSeconds()).padStart(2, '0');
-        
-        const dataHoraStr = `${dia}-${mes}-${ano} ${hora}${min}${seg}`;
-
-        // MONTAGEM FINAL DA STRING COM O PREFIXO CRONOLÓGICO
-        window.descricaoDivergenciaVolumes = `[${dataHoraStr}] Divergência de Volumes: ${descricao.trim()}`;
-        window.intercorrenciaFinal = window.descricaoDivergenciaVolumes; 
-        
-        console.log("🔒 String estruturada com sucesso para a planilha:", window.intercorrenciaFinal);
-    }
-    
-    if (evento.target && evento.target.id === "vol-sim") {
-        window.descricaoDivergenciaVolumes = "";
-        window.intercorrenciaFinal = "CONCLUÍDO";
-    }
-});
-
-
 
 // --- FUNÇÃO PARA BYPASS DE CORS (COLE NO TOPO DO SCRIPT) ---
 function fetchJSONP(url) {
@@ -439,56 +343,36 @@ async function forcarUpdateLista() {
     const icon = document.getElementById("icon-sync");
     const select = document.getElementById("romaneio");
     
-    // Captura o texto exato da transportadora ativa selecionada na tela de login
-    const transportadoraLogada = document.getElementById("login-transp") ? document.getElementById("login-transp").value.toString().trim().toUpperCase() : "";
-    
+    // 1. Salva a seleção atual (mesmo que seja vazia)
     const romaneioAnterior = select.value;
 
     if (btn) btn.disabled = true;
     if (icon) icon.innerText = "⏳";
 
     try {
-        // 1. Busca os dados brutos atualizados do backend para o array dadosCompletos
+        // 2. Busca novos dados do servidor (atualiza o array dadosCompletos)
         await carregarDadosIniciais(); 
         
-        // 2. Limpa e reinicia o Combobox com o rótulo padrão correto
-        select.innerHTML = '<option value="">Selecione o Romaneio</option>';
-        
-        if (typeof dadosCompletos !== 'undefined' && Array.isArray(dadosCompletos)) {
-            dadosCompletos.forEach(info => {
-                // BLINDAGEM DE PROPRIEDADE: Lê chaves em maiúsculo ou minúsculo nativo da planilha
-                const transpRomaneio = (info.Transp || info.transp || info.TRANSP || "").toString().trim().toUpperCase();
-                const statusInterc = (info.INTERCORRENCIAS || info.intercorrencias || info.Intercorrencias || "").toString().toUpperCase();
-                
-                // CRITÉRIO DE FILTRAGEM CORRIGIDO:
-                // Se pertencer à transportadora logada AND não possuir a palavra CONCLUÍDO, mantém na lista.
-                if (transpRomaneio === transportadoraLogada && !statusInterc.includes("CONCLUÍDO")) {
-                    const opt = document.createElement("option");
-                    opt.value = info.Romaneio || info.romaneio;
-                    opt.textContent = info.Romaneio || info.romaneio;
-                    select.appendChild(opt);
-                }
-            });
-        }
-        
-        // 3. Devolve a seleção do usuário se o item ainda constar como pendente/ativo
-        if (romaneioAnterior && select.querySelector(`option[value="${romaneioAnterior}"]`)) {
+        // 3. Restaura a seleção se ela ainda existir na nova lista
+        if (romaneioAnterior) {
             select.value = romaneioAnterior;
+            // Se tinha algo selecionado, força a barra de progresso a carregar os parciais
             await atualizarDadosExtras(); 
         } else {
+            // Se NADA estava selecionado, apenas garantimos que a interface esteja limpa
+            // mas o Select já estará com as novas opções prontas para o usuário escolher
             resetarInterface();
-            console.log("🏁 Filtro executado. Romaneio em STAND BY mantido com sucesso na lista.");
+            console.log("🔄 Lista de romaneios atualizada (Nenhum selecionado).");
         }
 
     } catch (e) {
-        console.error("Erro na filtragem visual:", e);
+        console.error(e);
         alert("❌ Falha na sincronização.");
     } finally {
         if (btn) btn.disabled = false;
         if (icon) icon.innerText = "🔄";
     }
 }
-
 
 // --- NOVA FUNÇÃO: BARREIRA INTELIGENTE DE PERMISSÕES (MOBILE VS PC) ---
 // --- FUNÇÃO: BARREIRA INTELIGENTE BASEADA NO DISPOSITIVO (USER AGENT) ---
@@ -645,13 +529,13 @@ async function iniciarConferencia() {
 // --- 3. CARREGAMENTO INICIAL (WINDOW.ONLOAD) ---
 // --- 3. CARREGAMENTO INICIAL (EXTRAÍDO PARA FUNÇÃO NOMEADA) ---
 // --- 3. CARREGAMENTO INICIAL (EXTRAÍDO PARA FUNÇÃO NOMEADA) ---
-// --- 3. CARREGAMENTO INICIAL (ATUALIZADO SEM PRECISAR CORRER PRO BACKEND) ---
+// --- 3. CARREGAMENTO INICIAL (EXTRAÍDO PARA FUNÇÃO NOMEADA) ---
 async function carregarDadosIniciais() {
     try {
         // 1. Tenta capturar a transportadora ativa do campo da tela principal
         let valorTransp = document.getElementById('transp') ? document.getElementById('transp').value : "";
         
-        // 2. BLINDAGEM MANUAL: Se estiver vazio, busca direto do campo usado no formulário de logon
+        // 2. BLINDAGEM MANUAl: Se estiver vazio, busca direto do campo usado no formulário de logon
         if (!valorTransp || valorTransp.toString().trim() === "") {
             valorTransp = document.getElementById('login-transp') ? document.getElementById('login-transp').value : "";
         }
@@ -664,19 +548,16 @@ async function carregarDadosIniciais() {
         const res = await fetch(urlSheets + "?action=getRomaneios&transp=" + encodeURIComponent(transpAtiva));
         const data = await res.json();
         
-        // --- 📋 ATUALIZAÇÃO DA REGRA DE FILTRO EXCLUSIVO NO HTML ---
-        // O item NÃO deve sumir se tiver conferência parcial. Ele SÓ deve sumir se a intercorrência contiver "CONCLUÍDO".
-        dadosCompletos = data.filter(item => {
-            const statusInterc = (item.INTERCORRENCIAS || item.intercorrencias || item.Intercorrencias || "").toString().toUpperCase();
-            return !statusInterc.includes("CONCLUÍDO");
-        });
+        // --- ADAPTAÇÃO: Filtra os dados antes de salvar na variável global ---
+        // Isso garante que romaneios com conferência preenchida sumam de vez da memória do App
+        dadosCompletos = data.filter(item => !item.Conferencia || item.Conferencia.toString().trim() === "");
         
         const select = document.getElementById("romaneio");
         
         if (select) {
             select.innerHTML = '<option value="">Selecione o Romaneio</option>';
             
-            // Usa o array filtrado para popular o select
+            // Usa o array já filtrado para popular o select
             dadosCompletos.forEach(item => {
                 let opt = document.createElement("option");
                 opt.value = item.Romaneio;
@@ -690,7 +571,6 @@ async function carregarDadosIniciais() {
         console.error("Erro ao carregar romaneios:", err);
     }
 }
-
 
 
 
@@ -763,38 +643,12 @@ async function realizarLogin() {
 
             // Injeta dados na tela principal (Mantido)
             document.getElementById('usuario').value = data.nome;
+            document.getElementById('transp').value = document.getElementById('login-transp').value;
             
-            // Armazena a string original digitada/selecionada pelo usuário antes da filtragem
-            const transportadoraOriginal = document.getElementById('login-transp').value;
-            document.getElementById('transp').value = transportadoraOriginal;
-            
-            // Carrega os dados do servidor para a memória global (array dadosCompletos)
+            // -----------------------------------------------------------------
+            // ADICIONADO APENAS O NECESSÁRIO: Carrega os dados filtrados imediatamente pós-autenticação
+            // -----------------------------------------------------------------
             await carregarDadosIniciais();
-
-            // -----------------------------------------------------------------
-            // ATUALIZAÇÃO REQUERIDA: ALIMENTAÇÃO FILTRADA DO COMBOBOX PÓS-LOGIN
-            // -----------------------------------------------------------------
-            const select = document.getElementById("romaneio");
-            if (select) {
-                select.innerHTML = '<option value="">Selecione o Romaneio</option>';
-                
-                const filtroTransp = transportadoraOriginal.trim().toUpperCase();
-
-                if (typeof dadosCompletos !== 'undefined' && Array.isArray(dadosCompletos)) {
-                    dadosCompletos.forEach(info => {
-                        const transpRomaneio = (info.Transp || info.transp || info.TRANSP || "").toString().trim().toUpperCase();
-                        const statusInterc = (info.INTERCORRENCIAS || info.intercorrencias || info.Intercorrencias || "").toString().toUpperCase();
-                        
-                        // Executa o filtro duplo idêntico à regra manual: transportadora correta e sem a palavra CONCLUÍDO
-                        if (transpRomaneio === filtroTransp && !statusInterc.includes("CONCLUÍDO")) {
-                            const opt = document.createElement("option");
-                            opt.value = info.Romaneio || info.romaneio;
-                            opt.textContent = info.Romaneio || info.romaneio;
-                            select.appendChild(opt);
-                        }
-                    });
-                }
-            }
             // -----------------------------------------------------------------
             
             showScreen('screen-main');
@@ -813,7 +667,6 @@ async function realizarLogin() {
         if (typeof enviandoDados !== 'undefined') enviandoDados = false;
     }
 }
-
 
 
 
@@ -929,18 +782,17 @@ function resetBotaoCadastro(btn, textoOriginal) {
 
 
 // --- 5. LOGICA DE CONFERÊNCIA (SINCRO COM ÂNCORA DE PROGRESSO) ---
-// =====================================================================
-// FUNCIONALIDADE 1: MANTIDA EXATAMENTE IGUAL (PRESERVANDO FLUXOS ORIGINAIS)
-// =====================================================================
 async function atualizarDadosExtras() {
     const selectRomaneio = document.getElementById("romaneio");
     const selectedId = selectRomaneio.value;
     const btnIniciar = document.getElementById("btnIniciar");
     const statusInfo = document.getElementById("status-info");
     
+    // Busca os dados do romaneio no array global (carregado no login/abertura)
     const info = dadosCompletos.find(r => r.Romaneio === selectedId);
 
     if (info) {
+        // --- VALIDAÇÃO DE TOKEN DIRETO NO SERVIDOR (EM TEMPO REAL) ---
         const tokenUsuario = prompt("Por favor, insira o TOKEN de segurança para este Romaneio:");
         
         if (tokenUsuario === null || tokenUsuario.trim() === "") {
@@ -962,7 +814,9 @@ async function atualizarDadosExtras() {
             const dataCheck = await resCheck.json();
             
             if (!dataCheck.valido) {
+                // Alerta padrão limpo e sem códigos de debug para o usuário final
                 alert("❌ Token incorreto! Acesso negado ao Romaneio.");
+
                 selectRomaneio.value = "";
                 if (typeof limparCamposExtras === 'function') limparCamposExtras();
                 if (statusInfo) statusInfo.style.display = "none";
@@ -979,39 +833,14 @@ async function atualizarDadosExtras() {
             return;
         }
 
-        // -----------------------------------------------------------------
-        // INJEÇÃO REQUERIDA: EXIBIÇÃO DE INTERCORRÊNCIA EM MODAL PÓS-TOKEN
-        // -----------------------------------------------------------------
-        // -----------------------------------------------------------------
-        // ATUALIZAÇÃO BLINDADA: CAPTURA E EXIBIÇÃO DA INTERCORRÊNCIA
-        // -----------------------------------------------------------------
-        // Faz a varredura completa por todas as grafias possíveis do campo
-        const intercorrenciaTexto = info.INTERCORRENCIAS || info.intercorrencias || info.Intercorrencias || info.Intercorrencia || "";
-
-        if (intercorrenciaTexto.toString().trim() !== "") {
-            const elModal = document.getElementById("modal-historico-intercorrencia");
-            const elTexto = document.getElementById("txt-historico-intercorrencia");
-            const mensagemLimpa = intercorrenciaTexto.toString().trim();
-            
-            // Se o elemento do modal existir no código HTML da página:
-            if (elModal && elTexto) {
-                elTexto.innerText = mensagemLimpa;
-                elModal.style.display = "flex"; // Abre o modal visual
-                console.log("⚠️ [MODAL] Exibindo histórico da última conferencia.");
-            } else {
-                // FALLBACK DE SEGURANÇA: Se o modal não foi achado no HTML, solta o alerta nativo
-                alert(`⚠️ ATENÇÃO: ROMANEIO RETIDO!\n\nEste romaneio possui ressalvas na última ação de conferencia:\n\n${mensagemLimpa}`);
-                console.warn("⚠️ [FALLBACK] Elementos do modal não localizados no HTML. Usando alert nativo.");
-            }
-        }
-        // -----------------------------------------------------------------
-
+        // --- MANUTENÇÃO DOS DADOS ORIGINAIS DO FORMULÁRIO ---
         document.getElementById("campo_operador").value = info.Operador || "";
         document.getElementById("transp").value = info.Transp || "";
         const totalPedidos = parseInt(info.TTPedidos) || 0;
         document.getElementById("total_pedidos").value = totalPedidos;
         document.getElementById("total_volumes").value = info.TTvols || 0;
 
+        // --- CORREÇÃO: Força a exibição do container de progresso que o reset escondeu ---
         const progressoContainer = document.getElementById("progresso-lote") || document.querySelector(".progress-container");
         if (progressoContainer) {
             progressoContainer.style.setProperty("display", "block", "important");
@@ -1027,27 +856,34 @@ async function atualizarDadosExtras() {
         btnIniciar.innerText = "Sincronizando...";
 
         try {
+            // Busca o que falta no Google Sheets em tempo real
             const response = await fetch(`${urlSheets}?action=verificarPendencias&romaneio=${encodeURIComponent(selectedId)}`);
             const result = await response.json();
 
             if (result.faltantes) {
                 const qtdFaltantes = result.faltantes.length;
+                
+                // jaLidosNoSheets = Tudo que já está com "OK" na planilha
                 const jaLidosNoSheets = totalPedidos - qtdFaltantes;
 
+                // Limpa a lista de bips da sessão atual (memória local)
                 codigosLidos = []; 
 
+                // Atualiza o contador visual na tela
                 const contadorEl = document.getElementById("contador");
                 if (contadorEl) {
                     contadorEl.innerText = jaLidosNoSheets;
                     contadorEl.setAttribute("data-base", jaLidosNoSheets);
                 }
                 
+                // --- ATUALIZAÇÃO CRÍTICA: Força o desenho da barra com os dados do servidor ---
                 if (typeof atualizarBarraProgresso === "function") {
                     atualizarBarraProgresso(jaLidosNoSheets); 
                 }
 
+                // TRAVA: Se não houver nada pendente, bloqueia o botão de iniciar
                 if (qtdFaltantes === 0) {
-                    alert("✅ A conferência de pedidos para este romaneio já está 100% CONCLUÍDA! Confirme os volumes e clique em 'FINALIZAR LOTE'");
+                    alert("✅ Este romaneio já está 100% CONCLUÍDO!");
                     if (statusInfo) {
                         statusInfo.innerText = "✅ ROMANEIO CONCLUÍDO";
                         statusInfo.style.background = "#d4edda";
@@ -1077,6 +913,7 @@ async function atualizarDadosExtras() {
         }
         
     } else {
+        // Se desmarcar o romaneio (valor vazio), limpa os campos e esconde o progresso
         if (typeof limparCamposExtras === 'function') limparCamposExtras();
         if (statusInfo) statusInfo.style.display = "none";
         
@@ -1086,7 +923,6 @@ async function atualizarDadosExtras() {
         }
     }
 }
-
 
 
 
@@ -1380,17 +1216,10 @@ function assinaturaVazia() {
 // Variável global para controle de envio (Mantenha no topo do script)
 //let enviandoDados = false;
 
-
-
 async function enviarDadosFinais() {
-    const btn = document.querySelector("button[onclick='']");
+    const btn = document.querySelector("button[onclick='finalizarLote()']");
     const areaAssinatura = document.getElementById("areaAssinatura");
     const romaneioAtual = document.getElementById("romaneio").value;
-
-    // =================================================================
-    // BLINDAGEM DE MEMÓRIA: Salva o ID antes que a interface limpe o Combobox
-    // =================================================================
-    window.romaneioEmFinalizacao = romaneioAtual;
 
     try {
         const canvas = document.getElementById('canvasAssinatura');
@@ -1401,6 +1230,7 @@ async function enviarDadosFinais() {
         const statusProgresso = elementoProgresso ? elementoProgresso.innerText.trim() : "";
 
         // 2. DETECÇÃO ROBUSTA DO DISPOSITIVO ATIVO NO MOMENTO DO ENVIO
+        // Checa se a variável global do primeiro bipe existe, senão inspeciona se o input ou container USB está visível na página
         const usbContainer = document.getElementById("container-leitor-usb");
         const inputUsb = document.getElementById("input-usb");
         const usarUsb = window.aparelhoUtilizadoNoLote === "via USB" || 
@@ -1411,8 +1241,8 @@ async function enviarDadosFinais() {
 
         // 3. IDENTIFICAÇÃO DE LEITURA BASEADA NO CARACTERE "100%" DO PROGRESSO VISUAL
         const textoObsDefinitivo = statusProgresso.includes("100%") 
-            ? `Conferencia de Pedidos Finalizada ${sufixoDispositivo}` 
-            : `Conferencia de Pedidos Parcial ${sufixoDispositivo}`;
+            ? `Conferencia Finalizada ${sufixoDispositivo}` 
+            : `Conferencia Parcial ${sufixoDispositivo}`;
 
         const payload = {
             action: "finalizarLote",
@@ -1423,8 +1253,7 @@ async function enviarDadosFinais() {
             assinatura: assinaturaBase64,
             conferencia: new Date().toLocaleString("pt-BR"),
             intercorrencia: intercorrenciaFinal, 
-            obs_final: textoObsDefinitivo, 
-            foto_avaria: window.fotoAvariaBase64 || "",
+            obs_final: textoObsDefinitivo, // Injeta a string calibrada por texto puro (100%) e hardware
             status_lote: statusProgresso 
         };
 
@@ -1436,46 +1265,40 @@ async function enviarDadosFinais() {
         const result = await response.json();
 
         if (result.success) {
-            // 1. BACKUP IMEDIATO: Salva o ID do romaneio atual em uma variável persistente
-            window.romaneioEmFinalizacao = romaneioAtual;
-            console.log("🔒 [BACKUP SEGURO] ID do Romaneio guardado na memória:", window.romaneioEmFinalizacao);
-
-            // 2. Atualiza lista local
+            // 1. Atualiza lista local
             if (typeof dadosCompletos !== 'undefined') {
                 dadosCompletos = dadosCompletos.filter(r => r.Romaneio !== romaneioAtual);
             }
 
-            // 3. Reconstrói o Combobox
+            // 2. Reconstrói o Combobox
             const select = document.getElementById("romaneio");
             if (select) {
                 select.innerHTML = '<option value="">Selecione um Romaneio...</option>';
                 dadosCompletos.forEach(info => select.add(new Option(info.Romaneio, info.Romaneio)));
             }
 
-            // 4. Direcionamento Logístico Condicional Atualizado
+            // --- LÓGICA DE DUPLO PROMPT CONDICIONAL ---
             setTimeout(async () => {
-                alert("✅ Dados salvos com sucesso!");
-
-                // Se houver texto de divergência coletado no rádio NÃO, pula o prompt de ocorrência extra
-                if (typeof descricaoDivergenciaVolumes !== "undefined" && descricaoDivergenciaVolumes !== "") {
-                    console.log("⏭️ Divergência de volumes ativa. Omitindo confirmação de ocorrência extra.");
-                    resetarInterface();
-                } else {
-                    // Fluxo padrão para quando for selecionado SIM
-                    const desejaOcorrencia = confirm("✅ Enviado! Deseja registrar ocorrência? Ex.: Caixa violada, Notas pendentes...?");
+                if (!pulouComentarioFinal) {
+                    const querComentario = confirm("✅ Enviado! Deseja adicionar um comentário?");
                     
-                    if (desejaOcorrencia) {
-                        const btnCancelarIntercor = document.getElementById("btn-cancelar-intercorrencia");
-                        if (btnCancelarIntercor) {
-                            btnCancelarIntercor.style.display = "inline-block";
-                            btnCancelarIntercor.classList.remove("hidden");
+                    if (querComentario) {
+                        const descricao = prompt("Digite seu comentário:");
+                        if (descricao !== null && descricao.trim() !== "") {
+                            await fetch(urlSheets, {
+                                method: 'POST',
+                                body: JSON.stringify({
+                                    action: "atualizarObsExtra",
+                                    romaneio: romaneioAtual,
+                                    comentario: descricao
+                                })
+                            });
                         }
-                        showScreen('screen-intercorrencia'); 
-                    } else {
-                        alert("Lote finalizado com sucesso!");
-                        resetarInterface();
                     }
                 }
+
+                alert("Lote finalizado com sucesso!");
+                resetarInterface();
             }, 600);
         } else {
             throw new Error(result.error || "Erro no servidor");
@@ -1499,8 +1322,6 @@ async function enviarDadosFinais() {
 
 
 
-
-
 // Função auxiliar para garantir que o botão volte ao normal
 function resetarTravaEnvio(btn, area) {
     enviandoDados = false;
@@ -1513,10 +1334,9 @@ function resetarTravaEnvio(btn, area) {
 
 
 
+
 let intercorrenciaFinal = "CONCLUÍDO";
 
-// --- FUNÇÃO 1: ENVIO DOS DADOS FINAIS (ATUALIZADA APENAS NO RETORNO CONDICIONAL) ---
-// --- FUNÇÃO 2: VALIDAÇÃO DO LOTE (MANTIDA ORIGINAL) ---
 async function finalizarLote() {
     if (enviandoDados) return;
 
@@ -1531,23 +1351,16 @@ async function finalizarLote() {
     if (areaAssinatura && (areaAssinatura.style.display === "block" || !areaAssinatura.classList.contains('hidden'))) {
         if (assinaturaVazia()) return alert("⚠️ Assine antes de finalizar!");
 
+        // Ativa trava e spinner antes de chamar o envio
         enviandoDados = true; 
         btn.disabled = true;
         btn.innerHTML = '<div class="spinner"></div> Enviando ao Servidor...';
         areaAssinatura.style.opacity = "0.5";
         areaAssinatura.style.pointerEvents = "none";
 
-        // REGRA DE SOBREPOSIÇÃO SOLICITADA:
-        // Se a variável do prompt não estiver vazia, força a intercorrenciaFinal a receber o texto
-        if (typeof window.descricaoDivergenciaVolumes !== "undefined" && window.descricaoDivergenciaVolumes !== "") {
-            intercorrenciaFinal = window.descricaoDivergenciaVolumes;
-            pulouComentarioFinal = false;
-        }
-
         await enviarDadosFinais(); 
         return;
     }
-
 
     // --- FASE 1: VALIDAÇÃO E AUDITORIA ---
     btn.disabled = true;
@@ -1557,36 +1370,45 @@ async function finalizarLote() {
         const response = await fetch(`${urlSheets}?action=verificarPendencias&romaneio=${encodeURIComponent(romaneioVal)}`);
         const check = await response.json();
 
-        // 1. Verifica Pendências (Standby) - Caso falte bipes, o Cancelar fica oculto
+        // 1. Verifica Pendências (Standby)
         if (check.faltantes && check.faltantes.length > 0) {
             const qtdFaltantes = check.faltantes.length;
             if (confirm(`⚠️ Atenção: Faltam conferir ${qtdFaltantes} itens neste lote.\n\nPara abortar a conferencia do romaneio, é obrigatório registrar intercorrencia. Continuar?`)) {
                 pulouComentarioFinal = true;
-                const btnCancelarIntercor = document.getElementById("btn-cancelar-intercorrencia");
-                if (btnCancelarIntercor) btnCancelarIntercor.style.display = "none"; // Oculta botão (Obrigatório)
                 showScreen('screen-intercorrencia'); 
             }
             btn.disabled = false;
             btn.innerText = "Finalizar Lote";
             return;
         }
+        // ... restante da sua função finalizarLote original ...
+        // 2. Auditoria de Volumes (Apenas se 100% lido)
 
-        // 2. Reseta a variável de controle preventivamente (Antiga auditoria removida)
-        if (typeof window.descricaoDivergenciaVolumes !== "undefined") {
-            window.descricaoDivergenciaVolumes = ""; 
+        const confirmouVolumes = confirm(`Confirmar o total de volumes: ${ttVolumes}?`);
+        
+        if (confirmouVolumes) {
+            intercorrenciaFinal = "Volumes confirmados / " + intercorrenciaFinal;
+            pulouComentarioFinal = false; // Se confirmou, ainda pode querer comentário no fim
+        } else {
+            alert("Por favor, informe o motivo da divergência de volumes.");
+            pulouComentarioFinal = true; // JÁ COMENTOU AQUI, então pula o prompt final
+            window.qtdFaltantesLoteAtual = 0; // Marca zero pois o erro foi de volume e não de bipes faltantes
+            showScreen('screen-intercorrencia'); 
+            btn.disabled = false;
+            btn.innerText = "Finalizar Lote";
+            return; 
         }
-        pulouComentarioFinal = false; 
 
-
-        // 3. Performance: Desliga Hardware
+        // 3. Performance: Desliga Hardware (Mantido original)
         const usbField = document.getElementById("container-leitor-usb");
         const camField = document.getElementById("reader");
         if (usbField) usbField.style.display = "none";
         if (camField) camField.style.display = "none";
 
+        // --- SUCESSO 100%: LIMPEZA PARA ASSINATURA ---
         if (typeof html5QrCode !== "undefined") {
             try {
-                if (html5QrCode.getState() === 2) { 
+                if (html5QrCode.getState() === 2) { // 2 = Scanning
                     await html5QrCode.stop();
                 }
             } catch (e) { console.warn("Erro ao parar câmera:", e); }
@@ -1610,113 +1432,44 @@ async function finalizarLote() {
     }
 }
 
-
-
-// --- FUNÇÃO AUXILIAR: MAPEIA O CLIQUE EM CANCELAR NA TELA DE INTERCORRÊNCIA ---
-// --- FUNÇÃO AUXILIAR: MAPEIA O CLIQUE EM CANCELAR NA TELA DE INTERCORRÊNCIA ---
-function fecharIntercorrenciaOpcional() {
-    const btnCancelarIntercor = document.getElementById("btn-cancelar-intercorrencia");
-    if (btnCancelarIntercor) btnCancelarIntercor.style.display = "none";
-    
-    // -----------------------------------------------------------------
-    // ADICIONADO APENAS O NECESSÁRIO: Reseta buffers e desliga hardware de vídeo
-    // -----------------------------------------------------------------
-    if (typeof desligarCameraAvaria === 'function') {
-        desligarCameraAvaria();
-    }
-    window.fotoAvariaBase64 = ""; 
-    
-    const previewImg = document.getElementById("preview-avaria");
-    if (previewImg) previewImg.src = "";
-    // -----------------------------------------------------------------
-
-    alert("Lote finalizado com sucesso!");
-    resetarInterface();
-}
-
-
-// Nova função adaptada com validação de campos obrigatórios e fluxo automático de assinatura
-// Nova função adaptada com validação de campos obrigatórios e fluxo automático de assinatura
-// Nova função adaptada com validação de campos obrigatórios e fluxo automático de encerramento imediato
 // Nova função adaptada com validação de campos obrigatórios e fluxo automático de assinatura
 async function registrarIntercorrencia() {
     const motivoSelect = document.getElementById("select-motivo");
     const obsInput = document.getElementById("obs-intercorrencia");
     
-    // CORREÇÃO CIRÚRGICA BLINDADA: Resgata o Romaneio salvo no backup do primeiro milisegundo do envio
-    const romaneioAlvoFixado = window.romaneioEmFinalizacao || document.getElementById("romaneio").value;
-    
     const motivo = motivoSelect ? motivoSelect.value.trim() : "";
     const obs = obsInput ? obsInput.value.trim() : "";
+    
+    const btnMain = document.querySelector("button[onclick='finalizarLote()']");
+    const areaAss = document.getElementById("areaAssinatura");
 
-    if (!romaneioAlvoFixado) return alert("⚠️ Erro de sessão: ID do Romaneio não localizado.");
+    // Validação estrita de obrigatoriedade dos dois campos na interface
     if (!motivo) return alert("⚠️ Por favor, selecione o motivo!");
     if (!obs) return alert("⚠️ Por favor, preencha a observação detalhada!");
 
-    if (motivo === "Mercadoria Avariada") {
-        if (typeof window.fotoAvariaBase64 === 'undefined' || !window.fotoAvariaBase64) {
-            if (typeof tocarBeep === 'function') tocarBeep('erro');
-            return alert("⚠️ Erro: É obrigatório tirar uma foto comprovando a avaria da mercadoria!");
-        }
-    }
+    // Identifica se a quebra veio por falta de bipes ou por divergência de volume
+    const faltantes = window.qtdFaltantesLoteAtual || 0;
+    const prefixo = faltantes > 0 ? `[PENDENTE ${faltantes} ITENS]` : "[DIVERGENCIA VOLUMES]";
+    
+    // Concatena mantendo a estrutura limpa para a string do payload
+    intercorrenciaFinal = `${prefixo} Motivo: ${motivo} | Obs: ${obs}`;
+    
+    // Limpa os campos internos para que não fiquem preenchidos em uma próxima carga
+    if (motivoSelect) motivoSelect.value = "";
+    if (obsInput) obsInput.value = "";
 
-    // REGRA RIGOROSA: Define estritamente o prefixo [STAND BY] ignorando formatações anteriores
-   // intercorrenciaFinal = `[STAND BY] Motivo: ${motivo} | Obs: ${obs}`;
-   // Linha de montagem dentro da função registrarIntercorrencia():
-    const dataHoraStr = obterDataHoraFormatada();
-    intercorrenciaFinal = `[${dataHoraStr}] [STAND BY] Motivo: ${motivo} | Obs: ${obs}`;
+    // Retorna para a tela principal
+    showScreen('screen-main'); 
+    
+    // Esconde leitores físicos para focar a visão na coleta da assinatura
+    const leitorUsb = document.getElementById("container-leitor-usb");
+    const leitorCam = document.getElementById("reader");
+    if (leitorUsb) leitorUsb.style.setProperty("display", "none", "important");
+    if (leitorCam) leitorCam.style.setProperty("display", "none", "important");
 
-
-    // Dispara a atualização do motivo diretamente via rota complementar para não resetar assinaturas
-    try {
-        document.querySelector("button[onclick='registrarIntercorrencia()']").disabled = true;
-        
-        const payloadOcorrencia = {
-            romaneio: romaneioAlvoFixado,
-            intercorrencia: intercorrenciaFinal,
-            foto_avaria: window.fotoAvariaBase64 || ""
-        };
-
-        // Faz o disparo secundário para atualizar os campos na linha correta
-        const response = await fetch(urlSheets, {
-            method: 'POST',
-            body: JSON.stringify(payloadOcorrencia)
-        });
-        
-        const result = await response.json();
-
-        if (result.success) {
-            alert("✅ Ocorrência registrada com sucesso!");
-            
-            if (motivoSelect) motivoSelect.value = "";
-            if (obsInput) obsInput.value = "";
-            if (typeof desligarCameraAvaria === 'function') desligarCameraAvaria();
-            window.fotoAvariaBase64 = "";
-            window.romaneioEmFinalizacao = ""; // Limpa o backup de sessão pós-conclusão
-
-            resetarInterface();
-            showScreen('screen-main');
-        } else {
-            alert("❌ Falha ao salvar ocorrência: " + result.error);
-        }
-    } catch (err) {
-        console.error(err);
-        alert("❌ Erro de comunicação.");
-    } finally {
-        document.querySelector("button[onclick='registrarIntercorrencia()']").disabled = false;
-    }
+    // Ativa imediatamente a busca por GPS e abre o Canvas para o desenho da assinatura
+    await prepararFaseAssinatura(btnMain, areaAss);
 }
-
-
-
-
-// Função auxiliar genérica para controle de loading (só para segurança contra quebra de código)
-function exibirAvisoLoadingGlobal(mostrar, texto) {
-    console.log(`${mostrar ? '⏳ START:' : '✅ STOP:'} ${texto || ''}`);
-}
-
-
-
 
 
 // Função essencial para permitir o próximo romaneio sem recarregar a página
@@ -1803,7 +1556,7 @@ function resetarInterface() {
         atualizarBarraProgresso(0); 
     }
 
-    // --- DESTRAVA DA ASSINATURA ---
+        // --- DESTRAVA DA ASSINATURA ---
     // --- DESTRAVA DA ASSINATURA ---
     // Remova o 'const', pois areaAss já foi declarada no Item 6
     if (areaAss) {
@@ -1817,11 +1570,6 @@ function resetarInterface() {
         elCanvas.style.pointerEvents = "auto";
     }
 
-    // Zera a variável de divergência de volumes para o próximo lote
-    descricaoDivergenciaVolumes = "";
-    // Desmarca a seleção dos botões de opção de volumes
-    document.querySelectorAll('input[name="confirmaVolumes"]').forEach(el => el.checked = false);
-   
     console.log("🏁 Reset completo: Interface limpa e barra de progresso pronta.");
 }
 
@@ -1868,190 +1616,10 @@ async function prepararFaseAssinatura(btn, areaAssinatura) {
     }
 }
 
-// Variáveis de controle locais para a foto da avaria
-let streamAvaria = null;
-let fotoAvariaBase64 = "";
-
-// Monitora se o motivo selecionado exige foto e descrição obrigatória
-// Monitora se o motivo selecionado exige comprovação visual obrigatória
-function verificarMotivoAvaria() {
-    const motivo = document.getElementById("select-motivo").value;
-    const containerFoto = document.getElementById("container-foto-avaria");
-    const inputObs = document.getElementById("obs-intercorrencia");
-
-    if (motivo === "Mercadoria Avariada") {
-        containerFoto.style.display = "block";
-        inputObs.placeholder = "⚠️ DESCRIÇÃO OBRIGATÓRIA: Descreva a avaria...";
-        inputObs.style.border = "2px solid red";
-
-        // Identifica o dispositivo usando o mesmo UserAgent que o login
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        if (isMobile) {
-            document.getElementById("wrapper-cam-mobile").style.display = "block";
-            document.getElementById("wrapper-upload-desktop").style.display = "none";
-        } else {
-            document.getElementById("wrapper-cam-mobile").style.display = "none";
-            document.getElementById("wrapper-upload-desktop").style.display = "block";
-        }
-    } else {
-        // Desliga e reseta tudo se mudar o select
-        if (typeof desligarCameraAvaria === 'function') desligarCameraAvaria();
-        containerFoto.style.display = "none";
-        inputObs.placeholder = "Explique os detalhes aqui...";
-        inputObs.style.border = "1px solid #ccc";
-        window.fotoAvariaBase64 = "";
-        
-        const preview = document.getElementById("preview-avaria");
-        if (preview) preview.style.display = "none";
-    }
-}
-
-// NOVO: Converte o arquivo selecionado no PC em string Base64 para envio transparente no payload
-function processarUploadFotoDesktop(input) {
-    const file = input.files[0];
-    const txtName = document.getElementById("txt-file-name");
-    const preview = document.getElementById("preview-avaria");
-
-    if (!file) return;
-
-    txtName.innerText = `📄 ${file.name}`;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        // Alimenta a mesma variável global que sua função registrarIntercorrencia() já valida
-        window.fotoAvariaBase64 = e.target.result;
-        
-        // Exibe o preview visual da imagem anexada na tela
-        if (preview) {
-            preview.src = e.target.result;
-            preview.style.display = "block";
-        }
-    };
-    reader.readAsDataURL(file);
-}
-
-
-// Liga a câmera do celular/PC diretamente no container de avarias
-async function ligarCameraAvaria() {
-    try {
-        const video = document.getElementById("video-avaria");
-        const img = document.getElementById("preview-avaria");
-        
-        streamAvaria = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: "environment" } // Prioriza câmera traseira no celular
-        });
-        
-        video.srcObject = streamAvaria;
-        video.style.display = "block";
-        img.style.display = "none";
-        
-        document.getElementById("btn-iniciar-cam-avaria").style.display = "none";
-        document.getElementById("btn-capturar-avaria").style.display = "inline-block";
-    } catch (err) {
-        console.error("Erro ao abrir câmera de avaria:", err);
-        alert("❌ Não foi possível abrir a câmera para registrar a avaria.");
-    }
-}
-
-// Captura o frame atual do vídeo e transforma em imagem Base64
-function capturarFotoAvaria() {
-    const video = document.getElementById("video-avaria");
-    const img = document.getElementById("preview-avaria");
     
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
-    
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    fotoAvariaBase64 = canvas.toDataURL("image/png");
-    
-    // Mostra o preview da foto estática e esconde o vídeo ativo
-    img.src = fotoAvariaBase64;
-    img.style.display = "block";
-    video.style.display = "none";
-    
-    // Desliga os sensores físicos da câmera para economizar bateria
-    desligarCameraAvaria();
-    
-    document.getElementById("btn-iniciar-cam-avaria").innerText = "🔄 Tirar Outra Foto";
-    document.getElementById("btn-iniciar-cam-avaria").style.display = "inline-block";
-    document.getElementById("btn-capturar-avaria").style.display = "none";
-}
-
-// Para o fluxo de vídeo fisicamente
-function desligarCameraAvaria() {
-    if (streamAvaria) {
-        streamAvaria.getTracks().forEach(track => track.stop());
-        streamAvaria = null;
-    }
-}
-
-function tratarCliqueNao(valor) {
-    if (valor !== "nao") return;
-
-    const romaneioVal = document.getElementById("romaneio").value;
-    if (!romaneioVal) {
-        alert("⚠️ Por favor, selecione um romaneio primeiro!");
-        document.getElementById("vol-nao").checked = false;
-        return;
-    }
-
-    // Dispara a caixa de digitação nativa do navegador de forma imediata
-    const descricao = window.prompt(`Descreva com detalhes, a divergência de volumes para o romaneio ${romaneioVal}. Relacione nº dos Pedidos/Qtd de volumes faltantes`);
-
-    // Validação impeditiva: impede o envio se cancelar ou deixar em branco
-    if (descricao === null || descricao.trim() === "") {
-        alert("⚠️ É obrigatório relatar os detalhes da divergência ao selecionar NÃO!");
-        document.getElementById("vol-nao").checked = false;
-        if (typeof descricaoDivergenciaVolumes !== 'undefined') {
-            descricaoDivergenciaVolumes = ""; 
-        }
-        return;
-    }
-
-    // Armazena com sucesso na variável global dedicada
-    descricaoDivergenciaVolumes = `Divergência de Volumes: ${descricao.trim()}`;
-    console.log("🔒 Variável preenchida com o prompt:", descricaoDivergenciaVolumes);
-}
-
-function obterDataHoraFormatada() {
-    const agora = new Date();
-    const dia = String(agora.getDate()).padStart(2, '0');
-    const mes = String(agora.getMonth() + 1).padStart(2, '0');
-    const ano = agora.getFullYear();
-    const hora = String(agora.getHours()).padStart(2, '0');
-    const min = String(agora.getMinutes()).padStart(2, '0');
-    const seg = String(agora.getSeconds()).padStart(2, '0');
-    
-    // Retorna estritamente no formato exigido: dd-MM-yyyy hhmmss
-    return `${dia}-${mes}-${ano} ${hora}${min}${seg}`;
-}
-
 
 </script>
 
-<!-- Cole este bloco no final do seu HTML antes do </body> -->
-<div id="modal-historico-intercorrencia" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
-    <div style="background-color: #ffffff; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-family: system-ui, -apple-system, sans-serif;">
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #6f42c1; padding-bottom: 8px;">
-            <span style="font-size: 20px;">⚠️</span>
-            <h4 style="color: #6f42c1; margin: 0; font-weight: bold; font-size: 16px; text-transform: uppercase;">Atenção: Romaneio Retido</h4>
-        </div>
-        <div style="margin-bottom: 20px;">
-            <p style="color: #495057; font-size: 13px; line-height: 1.5; margin-bottom: 10px;">Este romaneio possui histórico de ocorrência ou restrições salvas no servidor:</p>
-            <div id="txt-historico-intercorrencia" style="background: #f8f9fa; border-left: 4px solid #dc3545; padding: 10px; border-radius: 4px; font-size: 12px; font-weight: 500; color: #343a40; white-space: pre-wrap; max-height: 150px; overflow-y: auto; font-family: monospace;"></div>
-        </div>
-        <div style="display: flex; justify-content: flex-end;">
-            <button type="button" onclick="document.getElementById('modal-historico-intercorrencia').style.display = 'none'" style="background: #6f42c1; color: #ffffff; border: none; padding: 8px 20px; border-radius: 4px; font-weight: bold; font-size: 13px; cursor: pointer; text-transform: uppercase;">Ciente e Prosseguir</button>
-        </div>
-    </div>
-</div>
-
-
-
-    
 </body>
 </html>
+
