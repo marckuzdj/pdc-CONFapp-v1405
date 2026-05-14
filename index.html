@@ -110,7 +110,7 @@
 
 <!-- 1. TELA DE LOGIN -->
 <div id="screen-login" class="card"> <!-- Adicionado a classe card aqui -->
-    <h3>Passagem de Carga | Conferência v1</h3>
+    <h3>Passagem de Carga | Conferência v2</h3>
     <label>E-mail</label>
     <input type="email" id="login-user" placeholder="seu@email.com">
     
@@ -1230,7 +1230,6 @@ async function enviarDadosFinais() {
         const statusProgresso = elementoProgresso ? elementoProgresso.innerText.trim() : "";
 
         // 2. DETECÇÃO ROBUSTA DO DISPOSITIVO ATIVO NO MOMENTO DO ENVIO
-        // Checa se a variável global do primeiro bipe existe, senão inspeciona se o input ou container USB está visível na página
         const usbContainer = document.getElementById("container-leitor-usb");
         const inputUsb = document.getElementById("input-usb");
         const usarUsb = window.aparelhoUtilizadoNoLote === "via USB" || 
@@ -1253,7 +1252,7 @@ async function enviarDadosFinais() {
             assinatura: assinaturaBase64,
             conferencia: new Date().toLocaleString("pt-BR"),
             intercorrencia: intercorrenciaFinal, 
-            obs_final: textoObsDefinitivo, // Injeta a string calibrada por texto puro (100%) e hardware
+            obs_final: textoObsDefinitivo, 
             status_lote: statusProgresso 
         };
 
@@ -1277,29 +1276,13 @@ async function enviarDadosFinais() {
                 dadosCompletos.forEach(info => select.add(new Option(info.Romaneio, info.Romaneio)));
             }
 
-            // --- LÓGICA DE DUPLO PROMPT CONDICIONAL ---
-            setTimeout(async () => {
-                if (!pulouComentarioFinal) {
-                    const querComentario = confirm("✅ Enviado! Deseja adicionar um comentário?");
-                    
-                    if (querComentario) {
-                        const descricao = prompt("Digite seu comentário:");
-                        if (descricao !== null && descricao.trim() !== "") {
-                            await fetch(urlSheets, {
-                                method: 'POST',
-                                body: JSON.stringify({
-                                    action: "atualizarObsExtra",
-                                    romaneio: romaneioAtual,
-                                    comentario: descricao
-                                })
-                            });
-                        }
-                    }
-                }
-
+            // --- PROMPTS DE COMENTÁRIO REMOVIDOS ---
+            // Dispara apenas a conclusão de sucesso e limpa a tela de trabalho
+            setTimeout(() => {
                 alert("Lote finalizado com sucesso!");
                 resetarInterface();
             }, 600);
+
         } else {
             throw new Error(result.error || "Erro no servidor");
         }
@@ -1319,6 +1302,7 @@ async function enviarDadosFinais() {
         }
     }
 }
+
 
 
 
@@ -1407,6 +1391,9 @@ async function finalizarLote() {
         if (leitorUsb) leitorUsb.style.setProperty("display", "none", "important");
         if (leitorCam) leitorCam.style.setProperty("display", "none", "important");
         if (btnPendencias) btnPendencias.style.display = "none";
+
+         // INJEÇÃO DA FLAG PARA REMOVER O PROMPT DE COMENTÁRIO
+        pulouComentarioFinal = true; 
         
         await prepararFaseAssinatura(btn, areaAssinatura);
 
