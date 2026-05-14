@@ -110,7 +110,7 @@
 
 <!-- 1. TELA DE LOGIN -->
 <div id="screen-login" class="card"> <!-- Adicionado a classe card aqui -->
-    <h3>Passagem de Carga | Conferência v1</h3>
+    <h3>Passagem de Carga | Conferência v3</h3>
     <label>E-mail</label>
     <input type="email" id="login-user" placeholder="seu@email.com">
     
@@ -303,7 +303,7 @@
         <select id="select-motivo" onchange="verificarMotivoAvaria()">
             <option value="">Selecione o motivo...</option>
             <optgroup label="📦 Carga e Pedidos">
-                <option value="Divergência de Volumes">Divergência de Volumes (Faltando/Sobrando)</option>
+                 <!--   <option value="Divergência de Volumes">Divergência de Volumes (Faltando/Sobrando)</option> -->
                 <option value="Divergência de Pedidos">Divergência de Pedidos (Faltando/Sobrando)</option>
                 <option value="Mercadoria Avariada">Mercadoria Avariada/Danificada</option>
             </optgroup>
@@ -1014,7 +1014,7 @@ async function atualizarDadosExtras() {
                 console.log("⚠️ [MODAL] Exibindo histórico da última conferencia.");
             } else {
                 // FALLBACK DE SEGURANÇA: Se o modal não foi achado no HTML, solta o alerta nativo
-                alert(`⚠️ ATENÇÃO: ROMANEIO RETIDO!\n\nEste romaneio possui ressalvas da última conferencia:\n\n${mensagemLimpa}`);
+                alert(`⚠️ ATENÇÃO: ROMANEIO RETIDO!\n\nEste romaneio possui ressalvas na última ação de conferencia:\n\n${mensagemLimpa}`);
                 console.warn("⚠️ [FALLBACK] Elementos do modal não localizados no HTML. Usando alert nativo.");
             }
         }
@@ -1061,7 +1061,7 @@ async function atualizarDadosExtras() {
                 }
 
                 if (qtdFaltantes === 0) {
-                    alert("✅ Este romaneio já está 100% CONCLUÍDO!");
+                    alert("✅ A conferência de pedidos para este romaneio já está 100% CONCLUÍDA! Confirme os volumes e clique em 'FINALIZAR LOTE'");
                     if (statusInfo) {
                         statusInfo.innerText = "✅ ROMANEIO CONCLUÍDO";
                         statusInfo.style.background = "#d4edda";
@@ -1527,13 +1527,13 @@ function resetarTravaEnvio(btn, area) {
 
 
 
-
 let intercorrenciaFinal = "CONCLUÍDO";
-
-// --- FUNÇÃO 1: ENVIO DOS DADOS FINAIS (ATUALIZADA APENAS NO RETORNO CONDICIONAL) ---
-// --- FUNÇÃO 2: VALIDAÇÃO DO LOTE (MANTIDA ORIGINAL) ---
+// --- FUNÇÃO DE FINALIZAÇÃO CORRIGIDA E BLINDADA CONTRA CONFLITOS DE ESCOPO ---
 async function finalizarLote() {
     if (enviandoDados) return;
+
+    // 1. Instanciação LOCAL obrigatória para resetar o estado a cada clique do botão
+    let intercorrenciaFinal = "CONCLUÍDO"; 
 
     const romaneioVal = document.getElementById("romaneio").value;
     const areaAssinatura = document.getElementById("areaAssinatura");
@@ -1542,7 +1542,6 @@ async function finalizarLote() {
 
     if (!romaneioVal) return alert("⚠️ Selecione um romaneio!");
 
-    // --- FASE 2: ENVIO FINAL (Assinatura Aberta) ---
     // --- FASE 2: ENVIO FINAL (Assinatura Aberta) ---
     if (areaAssinatura && (areaAssinatura.style.display === "block" || !areaAssinatura.classList.contains('hidden'))) {
         if (assinaturaVazia()) return alert("⚠️ Assine antes de finalizar!");
@@ -1554,16 +1553,18 @@ async function finalizarLote() {
         areaAssinatura.style.pointerEvents = "none";
 
         // REGRA DE SOBREPOSIÇÃO SOLICITADA:
-        // Se a variável do prompt não estiver vazia, força a intercorrenciaFinal a receber o texto
-        if (typeof window.descricaoDivergenciaVolumes !== "undefined" && window.descricaoDivergenciaVolumes !== "") {
+        // Verifica na janela global se há divergência prévia para injetar no envio
+        if (typeof window.descricaoDivergenciaVolumes !== "undefined" && window.descricaoDivergenciaVolumes.trim() !== "") {
             intercorrenciaFinal = window.descricaoDivergenciaVolumes;
             pulouComentarioFinal = false;
         }
 
+        // ATENÇÃO: Certifique-se de que a função 'enviarDadosFinais' abaixo utilize a 
+        // variável 'intercorrenciaFinal' correta. Se ela for uma função externa, 
+        // passe o valor como argumento: enviarDadosFinais(intercorrenciaFinal);
         await enviarDadosFinais(); 
         return;
     }
-
 
     // --- FASE 1: VALIDAÇÃO E AUDITORIA ---
     btn.disabled = true;
@@ -1573,13 +1574,23 @@ async function finalizarLote() {
         const response = await fetch(`${urlSheets}?action=verificarPendencias&romaneio=${encodeURIComponent(romaneioVal)}`);
         const check = await response.json();
 
-        // 1. Verifica Pendências (Standby) - Caso falte bipes, o Cancelar fica oculto
+        // 1. Verifica Pendências (Standby)
         if (check.faltantes && check.faltantes.length > 0) {
             const qtdFaltantes = check.faltantes.length;
+            
+            // SE já houver divergência mapeada, pula o prompt visual da tela de intercorrência
+            if (typeof window.descricaoDivergenciaVolumes !== "undefined" && window.descricaoDivergenciaVolumes.trim() !== "") {
+                intercorrenciaFinal = window.descricaoDivergenciaVolumes;
+                pulouComentarioFinal = false;
+                // Executa direto a fase de assinatura pulando a tela de digitação
+                await prepararFaseAssinatura(btn, areaAssinatura);
+                return;
+            }
+
             if (confirm(`⚠️ Atenção: Faltam conferir ${qtdFaltantes} itens neste lote.\n\nPara abortar a conferencia do romaneio, é obrigatório registrar intercorrencia. Continuar?`)) {
                 pulouComentarioFinal = true;
                 const btnCancelarIntercor = document.getElementById("btn-cancelar-intercorrencia");
-                if (btnCancelarIntercor) btnCancelarIntercor.style.display = "none"; // Oculta botão (Obrigatório)
+                if (btnCancelarIntercor) btnCancelarIntercor.style.display = "none"; 
                 showScreen('screen-intercorrencia'); 
             }
             btn.disabled = false;
@@ -1587,7 +1598,6 @@ async function finalizarLote() {
             return;
         }
 
-        // 2. Nova Auditoria de Volumes (Validação Rígida dos Botões de Opção)
         // 2. Nova Auditoria de Volumes (Validação Rígida dos Botões de Opção)
         const confirmaRadio = document.querySelector('input[name="confirmaVolumes"]:checked');
 
@@ -1599,19 +1609,18 @@ async function finalizarLote() {
         }
 
         if (confirmaRadio.value === "sim") {
-            intercorrenciaFinal = "Volumes confirmados / " + intercorrenciaFinal;
+            intercorrenciaFinal = "CONCLUÍDO"; // Garante o reset explícito aqui
             if (typeof window.descricaoDivergenciaVolumes !== "undefined") {
                 window.descricaoDivergenciaVolumes = ""; 
             }
             pulouComentarioFinal = false; 
         } else {
-            // SE MARCOU NÃO: Aplica a mesma regra. Se não estiver vazia, atualiza a intercorrenciaFinal
-            if (typeof window.descricaoDivergenciaVolumes !== "undefined" && window.descricaoDivergenciaVolumes !== "") {
+            // SE MARCOU NÃO: Valida se a string global está populada
+            if (typeof window.descricaoDivergenciaVolumes !== "undefined" && window.descricaoDivergenciaVolumes.trim() !== "") {
                 intercorrenciaFinal = window.descricaoDivergenciaVolumes;
             }
             pulouComentarioFinal = false; 
         }
-
 
         // 3. Performance: Desliga Hardware
         const usbField = document.getElementById("container-leitor-usb");
@@ -2034,7 +2043,7 @@ function tratarCliqueNao(valor) {
     }
 
     // Dispara a caixa de digitação nativa do navegador de forma imediata
-    const descricao = window.prompt(`Descreva com detalhes, a divergência de volumes para o romaneio ${romaneioVal}. Mencione nº do Pedido, Total de volumes recebidos etc...`);
+    const descricao = window.prompt(`Descreva com detalhes, a divergência de volumes para o romaneio ${romaneioVal}. Relacione nº dos Pedidos/Qtd de volumes faltantes`);
 
     // Validação impeditiva: impede o envio se cancelar ou deixar em branco
     if (descricao === null || descricao.trim() === "") {
