@@ -1333,8 +1333,6 @@ function resetarTravaEnvio(btn, area) {
 }
 
 
-
-
 let intercorrenciaFinal = "CONCLUÍDO";
 
 async function finalizarLote() {
@@ -1381,23 +1379,11 @@ async function finalizarLote() {
             btn.innerText = "Finalizar Lote";
             return;
         }
-        // ... restante da sua função finalizarLote original ...
-        // 2. Auditoria de Volumes (Apenas se 100% lido)
 
-        const confirmouVolumes = confirm(`Confirmar o total de volumes: ${ttVolumes}?`);
-        
-        if (confirmouVolumes) {
-            intercorrenciaFinal = "Volumes confirmados / " + intercorrenciaFinal;
-            pulouComentarioFinal = false; // Se confirmou, ainda pode querer comentário no fim
-        } else {
-            alert("Por favor, informe o motivo da divergência de volumes.");
-            pulouComentarioFinal = true; // JÁ COMENTOU AQUI, então pula o prompt final
-            window.qtdFaltantesLoteAtual = 0; // Marca zero pois o erro foi de volume e não de bipes faltantes
-            showScreen('screen-intercorrencia'); 
-            btn.disabled = false;
-            btn.innerText = "Finalizar Lote";
-            return; 
-        }
+        // 2. Ajuste Automático de Volumes (PROMPT REMOVIDO)
+        // Define o texto diretamente sem interromper o operador com caixas de diálogo
+        intercorrenciaFinal = "Volumes confirmados / " + intercorrenciaFinal;
+        pulouComentarioFinal = false; 
 
         // 3. Performance: Desliga Hardware (Mantido original)
         const usbField = document.getElementById("container-leitor-usb");
@@ -1431,6 +1417,8 @@ async function finalizarLote() {
         alert("❌ Erro na validação.");
     }
 }
+
+
 
 // Nova função adaptada com validação de campos obrigatórios e fluxo automático de assinatura
 async function registrarIntercorrencia() {
