@@ -154,7 +154,7 @@
 
 <!-- 1. TELA DE LOGIN -->
 <div id="screen-login" class="card"> <!-- Adicionado a classe card aqui -->
-    <h3>Passagem de Carga | Conferência v3</h3>
+    <h3>Passagem de Carga | Conferência v4</h3>
     <label>E-mail</label>
     <input type="email" id="login-user" placeholder="seu@email.com">
     
@@ -869,16 +869,15 @@ async function atualizarDadosExtras() {
                 return;
             }
 
-            // --- INTERCEPTAÇÃO E VALIDAÇÃO DE ROMANEIO RETIDO ---
+            // --- EXIBIÇÃO DE HISTÓRICO INFORMATIVO (SEM ABORTAR OPERAÇÃO) ---
             if (dataCheck.retido) {
                 if (typeof exibirModalRetido === 'function') {
                     exibirModalRetido(dataCheck.intercorrencia);
                 } else {
-                    // Fallback de segurança caso as funções do modal ainda não estejam declaradas
-                    alert(`⚠️ Romaneio Retido:\n\n${dataCheck.intercorrencia}`);
-                    if (typeof resetarInterface === 'function') resetarInterface();
+                    // Fallback de segurança sem resetar a interface
+                    alert(`ℹ️ Histórico de Intercorrências:\n\n${dataCheck.intercorrencia}`);
                 }
-                return; // Bloqueia o avanço e mata o fluxo operacional do lote aqui
+                // O comando 'return' foi removido para manter a carga de dados ativa
             }
 
         } catch (errorDom) {
@@ -980,6 +979,7 @@ async function atualizarDadosExtras() {
         }
     }
 }
+
 
 
 
@@ -1665,11 +1665,9 @@ function fecharModalRetido() {
         modal.classList.add("hidden");
         modal.style.display = "none";
     }
-    // Usa a sua função nativa para limpar as seleções e impedir que o operador trabalhe no lote bloqueado
-    if (typeof resetarInterface === 'function') {
-        resetarInterface();
-    }
+    // O resetarInterface() foi removido daqui para deixar o operador seguir viagem
 }
+
  
 
 </script>
