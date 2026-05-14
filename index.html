@@ -227,6 +227,12 @@
         </div>
 
         <div class="form-group-oc">
+            <!-- O rótulo mudará dinamicamente adicionando um asterisco (*) vermelho quando obrigatório -->
+            <label id="lbl_oc_foto">Foto da Evidência/Avaria:</label>
+            <input type="file" id="oc_foto" accept="image/*">
+        </div>
+
+        <div class="form-group-oc">
             <label>Descrição detalhada:</label>
             <textarea id="oc_descricao" rows="3" placeholder="Insira o texto descritivo do problema ocorrido..."></textarea>
         </div>
@@ -245,7 +251,7 @@
 
 <!-- 1. TELA DE LOGIN -->
 <div id="screen-login" class="card"> <!-- Adicionado a classe card aqui -->
-    <h3>Passagem de Carga | Conferência v6</h3>
+    <h3>Passagem de Carga | Conferência v7</h3>
     <label>E-mail</label>
     <input type="email" id="login-user" placeholder="seu@email.com">
     
@@ -1806,23 +1812,48 @@ async function enviarOcorrenciaFluxo() {
     const motivo = document.getElementById("oc_motivo").value;
     const descricao = document.getElementById("oc_descricao").value;
     const tokenDev = document.getElementById("oc_token_devolucao").value;
+    const fotoInput = document.getElementById("oc_foto");
     const btn = document.getElementById("btnEnviarOcorrenciaFinal");
 
     if (!motivo) return alert("⚠️ Selecione o motivo da retenção!");
     if (!descricao.trim()) return alert("⚠️ Digite uma descrição detalhada!");
     if (!tokenDev.trim()) return alert("⚠️ Informe o TOKEN DE DEVOLUÇÃO!");
 
+    // VALIDAÇÃO ESTRITA: Obriga o upload se o motivo for Mercadoria Avariada
+    let temFoto = fotoInput && fotoInput.files.length > 0;
+    if (motivo === "Mercadoria Avariada" && !temFoto) {
+        return alert("⚠️ É obrigatório anexar uma foto para evidenciar a Mercadoria Avariada/Danificada!");
+    }
+
     btn.disabled = true;
-    btn.innerText = "Gravando...";
+    btn.innerText = "Processando arquivo...";
 
     try {
-        // Envia as propriedades limpas e isoladas para o backend processar
+        let fotoBase64 = "";
+        let fotoNome = "";
+
+        // Converte o arquivo de imagem para string Base64 se houver um arquivo selecionado
+        if (temFoto) {
+            const arquivo = fotoInput.files[0];
+            fotoNome = arquivo.name;
+            fotoBase64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]); // Extrai apenas a string de dados pura
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(arquivo);
+            });
+        }
+
+        btn.innerText = "Gravando...";
+
         const payloadOcorrencia = {
             action: "atualizarObsExtra",
             romaneio: romaneioSendoFinalizado,
             oc_motivo: motivo,
             oc_descricao: descricao.trim(),
-            oc_token: tokenDev.trim()
+            oc_token: tokenDev.trim(),
+            oc_foto_data: fotoBase64,  // String binária comprimida
+            oc_foto_nome: fotoNome     // Nome original do arquivo carregado
         };
 
         const response = await fetch(urlSheets, {
@@ -1844,13 +1875,29 @@ async function enviarOcorrenciaFluxo() {
 
     } catch (err) {
         console.error("Erro ao submeter ocorrência:", err);
-        alert("⚠️ O lote foi salvo, mas houve falha ao injetar a ocorrência no servidor: " + err.message);
-        pularOcorrenciaEFinalizar();
+        alert("⚠️ Falha ao registrar ocorrência: " + err.message);
     } finally {
         btn.disabled = false;
         btn.innerText = "Enviar";
     }
 }
+
+
+// Registra o monitoramento dinâmico no combobox de motivos
+document.addEventListener("DOMContentLoaded", function() {
+    const comboMotivo = document.getElementById("oc_motivo");
+    const labelFoto = document.getElementById("lbl_oc_foto");
+    
+    if (comboMotivo && labelFoto) {
+        comboMotivo.addEventListener("change", function() {
+            if (this.value === "Mercadoria Avariada") {
+                labelFoto.innerHTML = 'Foto da Evidência/Avaria: <span style="color: #dc3545; font-weight: bold;">(* Obrigatório)</span>';
+            } else {
+                labelFoto.innerHTML = 'Foto da Evidência/Avaria: <span style="color: #6c757d; font-weight: normal;">(Opcional)</span>';
+            }
+        });
+    }
+});
 
 
 
