@@ -251,7 +251,7 @@
 
 <!-- 1. TELA DE LOGIN -->
 <div id="screen-login" class="card"> <!-- Adicionado a classe card aqui -->
-    <h3>Passagem de Carga | Conferência v7</h3>
+    <h3>Passagem de Carga | Conferência v1</h3>
     <label>E-mail</label>
     <input type="email" id="login-user" placeholder="seu@email.com">
     
@@ -689,9 +689,12 @@ async function carregarDadosIniciais() {
         const res = await fetch(urlSheets + "?action=getRomaneios&transp=" + encodeURIComponent(transpAtiva));
         const data = await res.json();
         
-        // --- ADAPTAÇÃO: Filtra os dados antes de salvar na variável global ---
-        // Isso garante que romaneios com conferência preenchida sumam de vez da memória do App
-        dadosCompletos = data.filter(item => !item.Conferencia || item.Conferencia.toString().trim() === "");
+        // 🌟 NOVA ADAPTAÇÃO: Filtra os dados com base no Critério 2 antes de salvar na variável global
+        // Mantém na memória local APENAS se a intercorrência for vazia OU se NÃO contiver 'CONCLUÍDO'
+        dadosCompletos = data.filter(item => {
+            const textoIntercorrencia = (item.Intercorrencia || "").toUpperCase().trim();
+            return textoIntercorrencia === "" || !textoIntercorrencia.includes("CONCLUÍDO");
+        });
         
         const select = document.getElementById("romaneio");
         
@@ -712,6 +715,7 @@ async function carregarDadosIniciais() {
         console.error("Erro ao carregar romaneios:", err);
     }
 }
+
 
 
 
@@ -1419,30 +1423,32 @@ async function enviarDadosFinais() {
         const result = await response.json();
 
         if (result.success) {
-            // 1. Atualiza lista local
+            // 1. Atualiza o cache local removendo o romaneio processado
             if (typeof dadosCompletos !== 'undefined') {
                 dadosCompletos = dadosCompletos.filter(r => r.Romaneio !== romaneioAtual);
             }
 
-            // 2. Reconstrói o Combobox
+            // 2. Reconstrói o Combobox aplicando o novo filtro de Intercorrência
             const select = document.getElementById("romaneio");
             if (select) {
-                select.innerHTML = '<option value="">Selecione um Romaneio...</option>';
-                dadosCompletos.forEach(info => select.add(new Option(info.Romaneio, info.Romaneio)));
+                // Filtra o cache restante garantindo que nenhum item concluído burle a lista
+                const ativos = dadosCompletos.filter(r => {
+                    const txt = (r.Intercorrencia || "").toUpperCase().trim();
+                    return txt === "" || !txt.includes("CONCLUÍDO");
+                });
+                
+                select.innerHTML = '<option value="">Selecione o Romaneio</option>';
+                ativos.forEach(info => select.add(new Option(info.Romaneio, info.Romaneio)));
             }
 
-            // INTERCEPTADOR DE OCORRÊNCIAS DE ENCERRAMENTO
+            // Interceptador de ocorrências condicional (Mantido seu fluxo padrão)
             setTimeout(() => {
-                // Guarda o romaneio processado para uso nas telas de ocorrência
                 romaneioSendoFinalizado = romaneioAtual; 
-
-                // Exibe o primeiro Modal de Pergunta na tela do operador
                 const modalPerg = document.getElementById("modalPerguntaOcorrencia");
                 if (modalPerg) {
                     modalPerg.classList.remove("hidden");
                     modalPerg.style.display = "flex";
                 } else {
-                    // Fallback estrutural se os elementos visuais não forem achados no DOM
                     alert("Lote finalizado com sucesso!");
                     resetarInterface();
                 }
@@ -1451,6 +1457,7 @@ async function enviarDadosFinais() {
         } else {
             throw new Error(result.error || "Erro no servidor");
         }
+
 
     } catch (e) {
         console.error("Erro no envio:", e);
@@ -1797,16 +1804,18 @@ function abrirTelaOcorrenciaCompleta() {
 }
 
 function pularOcorrenciaEFinalizar() {
-    // Esconde todos os elementos de ocorrência abertos
     document.getElementById("modalPerguntaOcorrencia").style.display = "none";
     document.getElementById("modalPerguntaOcorrencia").classList.add("hidden");
     document.getElementById("screenOcorrenciaLote").style.display = "none";
     document.getElementById("screenOcorrenciaLote").classList.add("hidden");
     
-    // Entrega o fluxo de encerramento padrão original
+    // Força o re-desenho do combo baseado no cache filtrado atualizado
+    carregarDadosIniciais();
+    
     alert("Lote finalizado com sucesso!");
-    resetarInterface();
+    if (typeof resetarInterface === 'function') resetarInterface();
 }
+
 
 async function enviarOcorrenciaFluxo() {
     const motivo = document.getElementById("oc_motivo").value;
@@ -1869,6 +1878,8 @@ async function enviarOcorrenciaFluxo() {
             
             alert("Ocorrência registrada e Lote finalizado com sucesso!");
             resetarInterface();
+            // 🌟 CHAMA A FUNÇÃO CENTRALIZADA: Ela vai buscar os dados limpos e reconstruir o combo sozinho
+           // await carregarDadosIniciais();
         } else {
             throw new Error(result.error || "Erro ao salvar no servidor");
         }
