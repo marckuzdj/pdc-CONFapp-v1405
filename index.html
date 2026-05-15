@@ -251,7 +251,7 @@
 
 <!-- 1. TELA DE LOGIN -->
 <div id="screen-login" class="card"> <!-- Adicionado a classe card aqui -->
-    <h3>Passagem de Carga | Conferência v1</h3>
+    <h3>Passagem de Carga | Conferência v2</h3>
     <label>E-mail</label>
     <input type="email" id="login-user" placeholder="seu@email.com">
     
@@ -1003,6 +1003,10 @@ async function atualizarDadosExtras() {
             progressoContainer.style.setProperty("display", "block", "important");
         }
 
+        // 🌟 DIRECIONAMENTO DE CURSOR: Força o foco reativo no elemento transp imediatamente após validação do token
+        const fldTransp = document.getElementById("transp");
+        if (fldTransp) fldTransp.focus();
+
         if (statusInfo) {
             statusInfo.innerText = "⏳ Sincronizando dados com o servidor...";
             statusInfo.style.background = "#fff3cd";
@@ -1072,7 +1076,7 @@ async function atualizarDadosExtras() {
     } else {
         // Se desmarcar o romaneio (valor vazio), limpa os campos e esconde o progresso
         if (typeof limparCamposExtras === 'function') limparCamposExtras();
-        if (statusInfo) statusInfo.style.display = "none";
+        if (statusInfo) style.display = "none";
         
         const progressoContainer = document.getElementById("progresso-lote") || document.querySelector(".progress-container");
         if (progressoContainer) {
@@ -1080,6 +1084,7 @@ async function atualizarDadosExtras() {
         }
     }
 }
+
 
 
 
